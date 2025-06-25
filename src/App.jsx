@@ -6,11 +6,7 @@ import Warehouse3D from './components/WareHouse';
 
 
 function App() {
-  return (
-    <div>
-      <Warehouse3D />
-    </div>
-  );
+  return <Warehouse3D />;
 }
 
-export default App
+export default App;
