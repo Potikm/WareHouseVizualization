@@ -3,6 +3,8 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useEffect } from "react";
+import { fetchWithAuth } from "../api/fetchwithAuth";
+import { login } from "../api/auth";
 
 const BOX_WIDTH = 1;
 const BOX_HEIGHT = 1;
@@ -10,9 +12,7 @@ const BOX_DEPTH = 1.2;
 const GAP = 0.2;
 
 
-useEffect(() => {
-  
-}, []);
+
 
 const Box = ({ x, y, z, hasGoods, label, isTarget }) => (
   <mesh position={[x, y, z]}>
@@ -27,6 +27,24 @@ export default function WarehouseZones() {
   const [searchGoods, setSearchGoods] = useState("");
   const [searchBatch, setSearchBatch] = useState("");
   const [targetPosition, setTargetPosition] = useState(null);
+
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      try {
+        await login();  // přihlášení před fetch    
+        
+        const res = await fetchWithAuth("/warehouses/123/layout"); // nebo externí API
+        if (!res.ok) throw new Error("Chyba při načítání skladu");
+        const json = await res.json();
+        setWarehouseData(json);
+        setTargetPosition(null);
+      } catch (err) {
+        alert("Nepodařilo se načíst sklad: " + err.message);
+      }
+    };
+
+    fetchWarehouse();
+  }, []);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -101,11 +119,6 @@ export default function WarehouseZones() {
     setTargetPosition(null);
   };
 
-  const fetchWareHouse = async () => {
-  const response = await fetch(`https://api.example.com/pallet/`);
-  const data = await response.json();
-  return data;
-  };
 
   const fetchPositionByPallet = async (palletCode) => {
   const response = await fetch(`https://api.example.com/pallet/${palletCode}`);
@@ -175,8 +188,9 @@ export default function WarehouseZones() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      {!warehouseData ? (
-      <div
+      
+         {!warehouseData ? (
+       <div
         style={{
           position: "absolute",
           top: "50%",
@@ -185,10 +199,9 @@ export default function WarehouseZones() {
           textAlign: "center",
         }}
       >
-        <h2>Nahraj sklad rozdělený na zóny (JSON)</h2>
-        <input type="file" accept=".json" onChange={handleFileUpload} style={{ marginTop: "1rem" }} />
-      </div>
-
+         {/**<h2>Nahraj sklad rozdělený na zóny (JSON)</h2>
+        <input type="file" accept=".json" onChange={handleFileUpload} style={{ marginTop: "1rem" }} /> */}
+      </div> 
 
       ) : (
         <>
